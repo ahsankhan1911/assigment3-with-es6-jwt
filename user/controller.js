@@ -48,7 +48,7 @@ exports.logInUser = (req, res, next) =>  {
                 id: user._id,
                 email: req.body.email
             }, "secret",
-            {expiresIn: 10* 60000}
+            {expiresIn: 20* 60000}
         );
 
             res.send(myToken);
