@@ -5,16 +5,20 @@
 const mongoose = require( 'mongoose');
 const User = mongoose.model('Users');
 const jwt = require('jsonwebtoken');
+const auth = require('../Middlewares/Authentications');
+
 
 // var boom = require('express-boom');
-// var boom2 = require('boom');
+const Boom = require('boom');
 
 let myToken;
 let test;
 
-exports.createUser = function(req, res) {
+exports.createUser =(req, res) =>{
+
     let new_User = new User(req.body);
-    new_User.save(function (err, user) {
+
+    new_User.save((err, user) =>{
         if(!user){
             res.send(err);
         }
@@ -34,12 +38,8 @@ exports.logInUser = (req, res, next) =>  {
 
         if (!user) {
 
-        const err2 = new Error();
 
-        res.statusCode = 406;
-        err2.message = "Invalid Email or Password";
-
-        next(err2);
+        next(Boom.unauthorized("Invalid Email or Password"));
     }
 
        else {
@@ -52,8 +52,8 @@ exports.logInUser = (req, res, next) =>  {
         );
 
             res.send(myToken);
-    //test= "hello"
-            exports.myToken2 = myToken;
+
+            exports.myToken = myToken;
 
     }
 
@@ -65,22 +65,15 @@ exports.logInUser = (req, res, next) =>  {
 
 exports.userProfile =  (req, res, next) => {
 
-    let decode = jwt.verify(myToken, 'secret', (err, decoded) => {
+let decode = jwt.decode(myToken);
 
-               if(!decoded){
-
-                next(err);
-               }
-
-       else {
-                User.findOne({email: decoded.email}, (err, user) => {
+    User.findOne({email: decode.email }, (err, user) => {
 
                     res.send(user);
                 })
 
 
-            }
-             });
+
 
 };
 
@@ -88,21 +81,11 @@ exports.userProfile =  (req, res, next) => {
 
 exports.showUsers =  (req, res, next) => {
 
-    const decode = jwt.verify(myToken, 'secret', (err, decoded) => {
 
-            if (!decoded){
+User.find({}, function (err, user){
 
-
-        next(err.message);
-
-    }
-           else {
-        User.find({}, (err, user) => {
-
-            res.send(user);
-        });
-           }
-});
+   res.send(user)
+    });
 
 };
 
