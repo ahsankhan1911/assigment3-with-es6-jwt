@@ -7,7 +7,6 @@ const app = express();
 const port = process.env.PORT || 5000;
 const bodyParser = require ('body-parser');
 const mongoose = require('mongoose');
-const User =  require ('./user/Model');
 //const Boom  = require('boom');
 
 mongoose.connect('mongodb://localhost/userdb2', err => {
@@ -32,11 +31,11 @@ app.listen(port, () => {
 });
 
 
-app.use((err, req, res, next) => {
+app.use(  (err, req, res, next) => {
 
 
-    res.send(err.message);
+    res.status(err.output.payload.statusCode).send(err.message);
 
-
+    //res.send(err);
 
 });

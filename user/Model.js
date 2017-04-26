@@ -26,7 +26,10 @@ const UserSchema = new Schema({
 
         firstname:   {type: String, required: true},
         lastname: {type: String, required: true},
-        email: {type: String, lowercase: true, unique: true, validate: EmailValidator, required: true },
+        email: {type: String, lowercase: true, unique:{
+            errmsg: "Email Already exists",
+            value: true
+        }, validate: EmailValidator, required: true },
         phone: {type: Number, required: true , validate: PhoneValidator},
         password: {type: String, required: true},
     }

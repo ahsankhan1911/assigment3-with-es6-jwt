@@ -5,22 +5,24 @@
 const mongoose = require( 'mongoose');
 const User = mongoose.model('Users');
 const jwt = require('jsonwebtoken');
-const auth = require('../Middlewares/Authentications');
-
 
 // var boom = require('express-boom');
 const Boom = require('boom');
 
 let myToken;
-let test;
 
-exports.createUser =(req, res) =>{
+exports.createUser =(req, res, next) =>{
 
     let new_User = new User(req.body);
 
+    //console.log(req.body.email);
+
     new_User.save((err, user) =>{
-        if(!user){
-            res.send(err);
+
+        if (err) {
+            //err.toString().replace('ValidationError: ', '').split(',')
+             next(Boom.unauthorized(err));
+
         }
 
         else {
@@ -63,39 +65,31 @@ exports.logInUser = (req, res, next) =>  {
 };
 
 
-exports.userProfile =  (req, res, next) => {
+exports.userProfile =  (req, res) => {
 
-let decode = jwt.decode(myToken);
+      res.send(req.user);
 
-    User.findOne({email: decode.email }, (err, user) => {
-
-                    res.send(user);
-                })
+          };
 
 
 
-
-};
-
+exports.showUsers =  (req, res) => {
 
 
-exports.showUsers =  (req, res, next) => {
+      User.find({}, function (err, user){
 
-
-User.find({}, function (err, user){
-
-   res.send(user)
-    });
+             res.send(user)
+              });
 
 };
 
 
 
 exports.deleteUser = (req, res, next) => {
-    User.remove({}, (err, user) => {
+    User.remove({email: req.body.email}, (err, user) => {
 
         if (!user){
-        next(err)
+        next(Boom.badRequest("No user found to deleted"))
     }
 
         else {
