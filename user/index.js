@@ -22,5 +22,7 @@ router.post('/delete-user', middleware.authenticate,user.deleteUser);
 
 router.get('/user-profile', middleware.authenticate,user.userProfile);
 
+router.put('/update-user:email', user.updateUser)
+
 module.exports = router;
 

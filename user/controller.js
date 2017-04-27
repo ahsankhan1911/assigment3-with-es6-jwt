@@ -100,3 +100,19 @@ exports.deleteUser = (req, res, next) => {
 };
 
 
+exports.updateUser = (req, res) => {
+
+let updateThis = req.body;
+
+    User.update({email: req.params.email}, updateThis, (err, raw) => {
+
+       if(!raw){
+        res.send(err)
+       }
+
+
+       else {
+           res.send(raw);
+       }
+    })
+}
