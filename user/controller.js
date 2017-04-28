@@ -104,15 +104,32 @@ exports.updateUser = (req, res) => {
 
 let updateThis = req.body;
 
-    User.update({email: req.params.email}, updateThis, (err, raw) => {
+if(req.body.email){
+
+     res.send("You cannot change your email")
+}
+     else{
+
+    User.update({email: req.params.email},updateThis,(err, raw) => {
 
        if(!raw){
-        res.send(err)
-       }
+
+       res.send(err);       }
 
 
        else {
            res.send(raw);
        }
     })
+     }
+}
+
+exports.sortUsers = (req, res) => {
+
+//let param = req.params.param;
+
+User.findOne({param: req.params.firstname},function(err,docs){
+
+    res.send(docs);
+})
 }

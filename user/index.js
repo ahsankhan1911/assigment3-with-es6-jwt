@@ -22,7 +22,9 @@ router.post('/delete-user', middleware.authenticate,user.deleteUser);
 
 router.get('/user-profile', middleware.authenticate,user.userProfile);
 
-router.put('/update-user:email', user.updateUser)
+router.put('/update-user/:email', user.updateUser);
+
+router.get('/list/:param', user.sortUsers)
 
 module.exports = router;
 

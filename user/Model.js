@@ -5,6 +5,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const validate = require('mongoose-validator');
+let constantPlugin = require('mongoose-constant');
 
 const EmailValidator = [
     validate({
@@ -22,16 +23,16 @@ const PhoneValidator = [
     })
 ];
 
-const UserSchema = new Schema({
 
+
+let UserSchema = new Schema({
+    
         firstname:   {type: String, required: true},
         lastname: {type: String, required: true},
-        email: {type: String, lowercase: true, unique:{
-            errmsg: "Email Already exists",
-            value: true
-        }, validate: EmailValidator, required: true },
+        email: {type: String, lowercase: true, unique: true, validate: EmailValidator, required: true },
         phone: {type: Number, required: true , validate: PhoneValidator},
         password: {type: String, required: true},
     }
 );
+
 module.exports = mongoose.model('Users', UserSchema);
