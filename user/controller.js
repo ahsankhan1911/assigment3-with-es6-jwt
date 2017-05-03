@@ -24,7 +24,7 @@ exports.createUser =(req, res, next) =>{
 
         if (err) {
             //err.toString().replace('ValidationError: ', '').split(',')
-             next(Boom.unauthorized(err));
+             next(Boom.unauthorized(err.toString()));
 
         }
 
@@ -72,8 +72,10 @@ exports.userProfile =  (req, res) => {
 
 
 let users = req.user;
+
+//res.send(users);
       
-      User.findOne({_id: req.user._id}).populate('post').exec((err, user) => {
+      User.findOne({}).populate('posts').exec((err, user) => {
           if(!user){
               res.send(err)
           }
@@ -82,9 +84,10 @@ let users = req.user;
           res.send(user);
           //console.log(user.postedBy);
         }
-      })
-}
+      });
 
+
+}
 
 exports.showUsers =  (req, res) => {
 
@@ -169,9 +172,11 @@ exports.createPost = (req, res) => {
         postedBy: req.user._id
     });
 
-console.log(req.user._id);
+//console.log(Post._id);
 
 New_Post.save((err, post) => {
+
+let ahsan = req.user.posts;
 
     if (err) {
         res.send(err);
@@ -179,9 +184,12 @@ New_Post.save((err, post) => {
     }
 
     else {
-        res.send(post)
+        res.send(post); 
+        ahsan.push();
+        
     }
 });
+
 
 };
 

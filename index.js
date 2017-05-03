@@ -32,11 +32,11 @@ app.listen(port, () => {
 });
 
 
-app.use(  (err, req, res, next) => {
+// app.use(  (err, req, res, next) => {
 
 
-    res.status(err.output.payload.statusCode).send(err.message);
+//     res.status(err.output.payload.statusCode).send(err.message);
 
-    //res.send(err);
+//     //res.send(err);
 
-});
+// });

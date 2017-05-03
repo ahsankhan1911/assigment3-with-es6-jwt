@@ -32,7 +32,7 @@ let UserSchema = new Schema({
         email: {type: String, lowercase: true, unique: true, validate: EmailValidator, required: true },
         phone: {type: Number, required: true , validate: PhoneValidator},
         password: {type: String, required: true},
-        post: [{type: Schema.Types.ObjectId, ref: 'Posts'}],
+        posts: [{type: Schema.Types.ObjectId, default: 'No post yet', ref: 'Posts'}],
         followers: [{type: Number , default: 0}]
     }
 );
