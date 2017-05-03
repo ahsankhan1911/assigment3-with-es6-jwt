@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const bodyParser = require ('body-parser');
 const mongoose = require('mongoose');
-const Users =require( './user/Model');
+const Users = require( './user/Model');
 //const Boom  = require('boom');
 
 mongoose.connect('mongodb://localhost/userdb2', err => {

@@ -5,7 +5,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const validate = require('mongoose-validator');
-let constantPlugin = require('mongoose-constant');
+//let constantPlugin = require('mongoose-constant');
 
 const EmailValidator = [
     validate({
@@ -32,7 +32,17 @@ let UserSchema = new Schema({
         email: {type: String, lowercase: true, unique: true, validate: EmailValidator, required: true },
         phone: {type: Number, required: true , validate: PhoneValidator},
         password: {type: String, required: true},
+        post: [{type: Schema.Types.ObjectId, ref: 'Posts'}],
+        followers: [{type: Number , default: 0}]
     }
 );
 
+
+let PostSchema = new Schema({
+
+    userPost: {type: String},
+    postedBy : {type: Schema.Types.ObjectId, ref: 'Users'},
+});
+
 module.exports = mongoose.model('Users', UserSchema);
+module.exports = mongoose.model('Posts', PostSchema);

@@ -14,17 +14,23 @@ router.post('/create-user' , user.createUser);
 
 router.post('/login-user', user.logInUser);
 
-
 router.get('/show-users', middleware.authenticate, user.showUsers);
 
 router.post('/delete-user', middleware.authenticate,user.deleteUser);
-
 
 router.get('/user-profile', middleware.authenticate,user.userProfile);
 
 router.put('/update-user/:email', user.updateUser);
 
-router.get('/list/:param', user.sortUsers)
+router.get('/list/:param', user.sortUsers);
+
+router.post('/create-post', middleware.authenticate , user.createPost);
+
+router.delete('/delete-post', user.deletePost);
+
+router.put('/follow/:userId', user.followUser);
+
+router.put('/unfollow/:userId', user.unfollowUser);
 
 module.exports = router;
 

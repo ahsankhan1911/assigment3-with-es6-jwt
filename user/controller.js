@@ -4,12 +4,15 @@
 
 const mongoose = require( 'mongoose');
 const User = mongoose.model('Users');
+const Post = mongoose.model('Posts');
 const jwt = require('jsonwebtoken');
 
 // var boom = require('express-boom');
 const Boom = require('boom');
 
 let myToken;
+
+
 
 exports.createUser =(req, res, next) =>{
 
@@ -67,10 +70,20 @@ exports.logInUser = (req, res, next) =>  {
 
 exports.userProfile =  (req, res) => {
 
-      res.send(req.user);
 
-          };
+let users = req.user;
+      
+      User.findOne({_id: req.user._id}).populate('post').exec((err, user) => {
+          if(!user){
+              res.send(err)
+          }
 
+          else{
+          res.send(user);
+          //console.log(user.postedBy);
+        }
+      })
+}
 
 
 exports.showUsers =  (req, res) => {
@@ -117,19 +130,71 @@ if(req.body.email){
        res.send(err);       }
 
 
+
        else {
            res.send(raw);
+           console.log(raw.password);
        }
     })
      }
 }
 
+
 exports.sortUsers = (req, res) => {
 
-//let param = req.params.param;
+let fieldInSchema = req.params.param;
+//  console.log(saad);
 
-User.findOne({param: req.params.firstname},function(err,docs){
+User.find({}).sort(fieldInSchema).exec((err, docs) => {
 
+if(!docs){
+
+    res.send(err);
+}   
+
+else {
     res.send(docs);
-})
 }
+
+});
+
+
+}
+
+exports.createPost = (req, res) => {
+
+    let New_Post = new Post({
+
+        userPost: req.body.userPost,
+        postedBy: req.user._id
+    });
+
+console.log(req.user._id);
+
+New_Post.save((err, post) => {
+
+    if (err) {
+        res.send(err);
+
+    }
+
+    else {
+        res.send(post)
+    }
+});
+
+};
+
+exports.deletePost = (req, res) => {
+
+
+}
+
+exports.followUser = (req, res) => {
+
+
+}
+
+exports.unfollowUser = (req, res) => {
+
+};
