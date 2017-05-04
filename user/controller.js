@@ -1,6 +1,3 @@
-/**
- * Created by ahsan on 4/22/2017.
- */
 
 const mongoose = require( 'mongoose');
 const User = mongoose.model('Users');
@@ -75,7 +72,7 @@ let users = req.user;
 
 //res.send(users);
       
-      User.findOne({}).populate('posts').exec((err, user) => {
+      User.findOne({posts: req.user.posts}).populate('posts').exec((err, user) => {
           if(!user){
               res.send(err)
           }
@@ -172,11 +169,9 @@ exports.createPost = (req, res) => {
         postedBy: req.user._id
     });
 
-//console.log(Post._id);
-
 New_Post.save((err, post) => {
 
-let ahsan = req.user.posts;
+let authUser = req.user;
 
     if (err) {
         res.send(err);
@@ -185,7 +180,12 @@ let ahsan = req.user.posts;
 
     else {
         res.send(post); 
-        ahsan.push();
+        authUser.posts.push(post);
+
+        authUser.save((err, poster) => {
+
+            console.log(poster);
+        });
         
     }
 });
@@ -195,8 +195,11 @@ let ahsan = req.user.posts;
 
 exports.deletePost = (req, res) => {
 
+User.remove({})
 
-}
+    
+
+};
 
 exports.followUser = (req, res) => {
 

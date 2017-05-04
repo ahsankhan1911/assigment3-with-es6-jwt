@@ -26,11 +26,11 @@ router.get('/list/:param', user.sortUsers);
 
 router.post('/create-post', middleware.authenticate , user.createPost);
 
-router.delete('/delete-post', user.deletePost);
+router.delete('/delete-post/:postId', middleware.authenticate, user.deletePost);
 
-router.put('/follow/:userId', user.followUser);
+router.put('/follow/:userId', middleware.authenticate, user.followUser);
 
-router.put('/unfollow/:userId', user.unfollowUser);
+router.put('/unfollow/:userId', middleware.authenticate, user.unfollowUser);
 
 module.exports = router;
 
