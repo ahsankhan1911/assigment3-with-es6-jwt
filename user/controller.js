@@ -59,22 +59,22 @@ exports.logInUser = (req, res, next) =>  {
 
     }
 
-});
+ });
 
 
 };
 
 
-exports.userProfile =  (req, res) => {
+exports.userProfile =  (req, res, next) => {
 
 
      let users = req.user;
 
-//res.send(users);
+
       
       User.findOne({_id: req.user._id}).populate('posts followers', '-followers -posts -_id -__v -password').exec((err, user) => {
           if(!user){
-              res.send(err)
+              next(Boom.notFound(err.toString()));
           }
 
           else{
@@ -110,33 +110,35 @@ exports.deleteUser = (req, res, next) => {
 
 };
 
-exports.updateUser = (req, res) => {
+exports.updateUser = (req, res, next) => {
 
       let updateThis = req.body;
 
-     if(req.body.email){
+     if(req.body.email) {
 
-     res.send("You cannot change your email")
+     next(Boom.forbidden("You cannot change your email"));
+
          }
-     else{
+
+     else {
 
     User.update({email: req.params.email},updateThis,(err, raw) => {
 
        if(!raw){
 
-       res.send(err);       }
-
-
+       next(Boom.notFound(err.toString()));      
+        
+       }
 
        else {
            res.send(raw);
-           console.log(raw.password);
+    
        }
     })
      }
 }
 
-exports.sortUsers = (req, res) => {
+exports.sortUsers = (req, res, next) => {
 
        let fieldInSchema = req.params.param;
         //  console.log(saad);
@@ -145,8 +147,8 @@ exports.sortUsers = (req, res) => {
  
            if(!docs){
 
-         res.send(err);
-      }   
+         next(Boom.badImplementation(err.toString()));
+         }   
 
         else {
     res.send(docs);
@@ -157,7 +159,7 @@ exports.sortUsers = (req, res) => {
 
 };
 
-exports.createPost = (req, res) => {    
+exports.createPost = (req, res, next) => {    
 
     let New_Post = new Post({
 
@@ -170,7 +172,7 @@ exports.createPost = (req, res) => {
          let authUser = req.user;
 
     if (err) {
-        res.send(err);
+        next(err.toString());
 
     }
 
@@ -189,25 +191,25 @@ exports.createPost = (req, res) => {
 
 };
 
-exports.deletePost = (req, res) => {
+exports.deletePost = (req, res, next) => {
 
     let paramID  = req.params.postId
 
      Post.findOne({_id: req.params.postId}, (err, post) => {
 
       return post.remove((err) => {
-        if(!err) {
-             
-             
-            User.update({_id: post.postedBy}, {$pull: {posts: post._id}}, (err) => {
-                 if(err) {
+
+            if(!err) {   
+
+              User.update({_id: post.postedBy}, {$pull: {posts: post._id}}, (err) => {
+                    if(err) {
                      
-                     res.send(err)
-                 }
-                  else {
-                 res.send("Post Deleted");
-                  }
-            })
+                        next(Boom.notFound(err.toString()));
+                        }
+                    else {
+                            res.send("Post Deleted");
+                         }
+            });
 
        }
       });
@@ -216,7 +218,7 @@ exports.deletePost = (req, res) => {
    
 };
 
-exports.followUser = (req, res) => {
+exports.followUser = (req, res, next) => {
 
    User.findOne({_id: req.params.userId}, (err, usertoFollow) => {
 
@@ -225,7 +227,7 @@ exports.followUser = (req, res) => {
     usertoFollow.save((err, done) => {
 
     if(err) {
-        res.send(err);
+        next(Boom.notFound("Not a valid ID"));
     }
 
     else{
@@ -236,11 +238,18 @@ exports.followUser = (req, res) => {
 
 }
 
-exports.unfollowUser = (req, res) => {
+exports.unfollowUser = (req, res, next) => {
 
-User.findOne({_id: req.params.userId}, (err, usertoUnfollow) => {
+User.findOneAndUpdate({_id: req.params.userId},{$pull: {followers: req.user._id}}, (err, done) => {
 
+     if(err) {
+         next(Boom.notAcceptable("Not a valid user ID"));
+           }
 
-})
+     else {
+           res.send("You unfollowed " + done.firstname);
+       }
+
+      })
 
 };
