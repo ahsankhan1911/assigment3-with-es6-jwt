@@ -207,7 +207,7 @@ exports.deletePost = (req, res, next) => {
                         next(Boom.notFound(err.toString()));
                         }
                     else {
-                            res.send("Post Deleted");
+                            res.send("Post Deleted Successfully");
                          }
             });
 
