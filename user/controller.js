@@ -68,11 +68,11 @@ exports.logInUser = (req, res, next) =>  {
 exports.userProfile =  (req, res) => {
 
 
-let users = req.user;
+     let users = req.user;
 
 //res.send(users);
       
-      User.findOne({posts: req.user.posts}).populate('posts').exec((err, user) => {
+      User.findOne({_id: req.user._id}).populate('posts followers', '-followers -posts -_id -__v -password').exec((err, user) => {
           if(!user){
               res.send(err)
           }
@@ -96,8 +96,6 @@ exports.showUsers =  (req, res) => {
 
 };
 
-
-
 exports.deleteUser = (req, res, next) => {
     User.remove({email: req.body.email}, (err, user) => {
 
@@ -108,19 +106,18 @@ exports.deleteUser = (req, res, next) => {
         else {
         res.send({message: 'Task successfully deleted'})
         }
-});
+ });
 
 };
 
-
 exports.updateUser = (req, res) => {
 
-let updateThis = req.body;
+      let updateThis = req.body;
 
-if(req.body.email){
+     if(req.body.email){
 
      res.send("You cannot change your email")
-}
+         }
      else{
 
     User.update({email: req.params.email},updateThis,(err, raw) => {
@@ -139,29 +136,28 @@ if(req.body.email){
      }
 }
 
-
 exports.sortUsers = (req, res) => {
 
-let fieldInSchema = req.params.param;
-//  console.log(saad);
+       let fieldInSchema = req.params.param;
+        //  console.log(saad);
 
-User.find({}).sort(fieldInSchema).exec((err, docs) => {
+       User.find({}).sort(fieldInSchema).exec((err, docs) => {
+ 
+           if(!docs){
 
-if(!docs){
+         res.send(err);
+      }   
 
-    res.send(err);
-}   
-
-else {
+        else {
     res.send(docs);
-}
+          }
 
-});
+            });
 
 
-}
+};
 
-exports.createPost = (req, res) => {
+exports.createPost = (req, res) => {    
 
     let New_Post = new Post({
 
@@ -169,9 +165,9 @@ exports.createPost = (req, res) => {
         postedBy: req.user._id
     });
 
-New_Post.save((err, post) => {
+       New_Post.save((err, post) => {
 
-let authUser = req.user;
+         let authUser = req.user;
 
     if (err) {
         res.send(err);
@@ -188,24 +184,63 @@ let authUser = req.user;
         });
         
     }
-});
+ });
 
 
 };
 
 exports.deletePost = (req, res) => {
 
-User.remove({})
+    let paramID  = req.params.postId
 
+     Post.findOne({_id: req.params.postId}, (err, post) => {
+
+      return post.remove((err) => {
+        if(!err) {
+             
+             
+            User.update({_id: post.postedBy}, {$pull: {posts: post._id}}, (err) => {
+                 if(err) {
+                     
+                     res.send(err)
+                 }
+                  else {
+                 res.send("Post Deleted");
+                  }
+            })
+
+       }
+      });
     
-
+     });
+   
 };
 
 exports.followUser = (req, res) => {
 
+   User.findOne({_id: req.params.userId}, (err, usertoFollow) => {
+
+    let logedUser = req.user;
+    usertoFollow.followers.push(logedUser._id);
+    usertoFollow.save((err, done) => {
+
+    if(err) {
+        res.send(err);
+    }
+
+    else{
+        res.send("You followed " + usertoFollow.firstname);
+    }
+    });
+   });
 
 }
 
 exports.unfollowUser = (req, res) => {
+
+User.findOne({_id: req.params.userId}, (err, usertoUnfollow) => {
+
+
+})
 
 };
