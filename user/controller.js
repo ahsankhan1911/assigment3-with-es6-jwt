@@ -16,37 +16,36 @@ exports.createUser =(req, res, next) =>{
 
     new_User.save()
     .then((user) =>{
-        if(user) {
+        
             res.send("Thanks for signup " + user.firstname);
-        }
+        
     })
     .catch((err) => {
-
-        if(err) {
             next(Boom.unauthorized(err.toString()));
-        }
+    
     });
 };
 
 
 exports.logInUser = (req, res, next) =>  {
     User.findOne({email: req.body.email, password: req.body.password}).then( (user) => {
-             if(user) {
-                 myToken = jwt.sign({
-                id: user._id,
-                email: req.body.email
-            }, "secret",
-            {expiresIn: 10 * 60});
+             
+            myToken = jwt.sign({
+                    id: user._id,
+                    email: req.body.email}, 
+                    "secret",
+                    {expiresIn: 10 * 60});
 
             res.send(myToken);
-            exports.myToken = myToken;
+            
+      exports.myToken = myToken;
 
-             }
-    }).catch((err) => {
-        if(err){
+             
+    }).catch((err) =>    {
+
             next(Boom.unauthorized("Invalid Email or Password"));
             console.log(err);
-        }
+        
     });
  
 };
@@ -58,13 +57,13 @@ exports.userProfile =  (req, res, next) => {
 
   User.findOne({_id: req.user._id}).populate('posts followers', '-followers -posts -_id -__v -password').exec()
       .then((user) => {
-          if(user) {
+          
                res.send(user);
-          }
+        
       }).catch((err) => {
-          if(err) {
+          
               next(Boom.notFound(err.toString()));
-          }
+        
       })
 
 
@@ -74,9 +73,9 @@ exports.showUsers =  (req, res, next) => {
 
 
       User.find({}).then((user) => {
-          if(user) {
+        
               res.send(user);
-          }
+        
       }).catch((err) => {
           next(Boom.notFound(err.toString()));
       });
@@ -84,16 +83,20 @@ exports.showUsers =  (req, res, next) => {
 };
 
 exports.deleteUser = (req, res, next) => {
-    User.remove({email: req.body.email}).then((err) =>{
-         if(!err) {
-           return res.send('User deleted successfuly');
-        }
+    User.findOne({email: req.body.email}).exec()
+    
+    .then((user) =>{
+         
+         return  user.remove();  
+    }).then((user) => {
 
-        else{
-            next(Boom.notFound("No user to found to deleted"));
-        }
-    }
-    )
+        res.send("User Deleted");
+    })
+
+    .catch((err) => {
+
+       next(Boom.notFound("No user to found to deleted"));
+    });
 
 };
 
