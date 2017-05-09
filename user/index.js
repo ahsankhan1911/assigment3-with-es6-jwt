@@ -10,17 +10,17 @@ const user  = require('./controller');
 
 //router.use(expressJWT({secret: 'secret'}).unless({path: ['/users/login-user', '/users/create-user']}));
 
-router.post('/create-user' , user.createUser);
+router.post('/create' , user.createUser);
 
-router.post('/login-user', user.logInUser);
+router.post('/login', user.logInUser);
 
-router.get('/show-users', middleware.authenticate, user.showUsers);
+router.get('/show', middleware.authenticate, user.showUsers);
 
-router.post('/delete-user', middleware.authenticate,user.deleteUser);
+router.post('/delete', middleware.authenticate,user.deleteUser);
 
-router.get('/user-profile', middleware.authenticate,user.userProfile);
+router.get('/profile', middleware.authenticate,user.userProfile);
 
-router.put('/update-user/:email', user.updateUser);
+router.put('/update/:email', user.updateUser);
 
 router.get('/list/:param', user.sortUsers);
 

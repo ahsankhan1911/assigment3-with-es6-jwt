@@ -33,7 +33,7 @@ let UserSchema = new Schema({
         phone: {type: Number, required: true , validate: PhoneValidator},
         password: {type: String, required: true},
         posts: [{type: Schema.Types.ObjectId, ref: 'Posts'}],
-        followers: [{type: Schema.Types.ObjectId}]
+        followers: [{type: Schema.Types.ObjectId, unique: true}]
     }
 );
 

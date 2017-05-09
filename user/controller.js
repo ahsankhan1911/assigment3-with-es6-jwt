@@ -10,103 +10,90 @@ const Boom = require('boom');
 let myToken;
 
 
-
 exports.createUser =(req, res, next) =>{
 
     let new_User = new User(req.body);
 
-    //console.log(req.body.email);
-
-    new_User.save((err, user) =>{
-
-        if (err) {
-            //err.toString().replace('ValidationError: ', '').split(',')
-             next(Boom.unauthorized(err.toString()));
-
-        }
-
-        else {
-
+    new_User.save()
+    .then((user) =>{
+        if(user) {
             res.send("Thanks for signup " + user.firstname);
         }
+    })
+    .catch((err) => {
+
+        if(err) {
+            next(Boom.unauthorized(err.toString()));
+        }
     });
-
-
-
 };
 
+
 exports.logInUser = (req, res, next) =>  {
-    User.findOne({email: req.body.email, password: req.body.password}, (err, user) => {
-
-        if (!user) {
-
-
-        next(Boom.unauthorized("Invalid Email or Password"));
-    }
-
-       else {
-
-          myToken = jwt.sign({
+    User.findOne({email: req.body.email, password: req.body.password}).then( (user) => {
+             if(user) {
+                 myToken = jwt.sign({
                 id: user._id,
                 email: req.body.email
             }, "secret",
-            {expiresIn: 20* 60000}
-        );
+            {expiresIn: 10 * 60});
 
             res.send(myToken);
-
             exports.myToken = myToken;
 
-    }
-
- });
-
-
+             }
+    }).catch((err) => {
+        if(err){
+            next(Boom.unauthorized("Invalid Email or Password"));
+            console.log(err);
+        }
+    });
+ 
 };
 
 
 exports.userProfile =  (req, res, next) => {
 
-
      let users = req.user;
 
-
-      
-      User.findOne({_id: req.user._id}).populate('posts followers', '-followers -posts -_id -__v -password').exec((err, user) => {
-          if(!user){
+  User.findOne({_id: req.user._id}).populate('posts followers', '-followers -posts -_id -__v -password').exec()
+      .then((user) => {
+          if(user) {
+               res.send(user);
+          }
+      }).catch((err) => {
+          if(err) {
               next(Boom.notFound(err.toString()));
           }
+      })
 
-          else{
-          res.send(user);
-          //console.log(user.postedBy);
-        }
+
+};
+
+exports.showUsers =  (req, res, next) => {
+
+
+      User.find({}).then((user) => {
+          if(user) {
+              res.send(user);
+          }
+      }).catch((err) => {
+          next(Boom.notFound(err.toString()));
       });
-
-
-}
-
-exports.showUsers =  (req, res) => {
-
-
-      User.find({}, function (err, user){
-
-             res.send(user)
-              });
 
 };
 
 exports.deleteUser = (req, res, next) => {
-    User.remove({email: req.body.email}, (err, user) => {
-
-        if (!user){
-        next(Boom.badRequest("No user found to deleted"))
-    }
-
-        else {
-        res.send({message: 'Task successfully deleted'})
+    User.remove({email: req.body.email}).then((err) =>{
+         if(!err) {
+           return res.send('User deleted successfuly');
         }
- });
+
+        else{
+            next(Boom.notFound("No user to found to deleted"));
+        }
+    }
+    )
 
 };
 
@@ -116,32 +103,28 @@ exports.updateUser = (req, res, next) => {
 
      if(req.body.email) {
 
-     next(Boom.forbidden("You cannot change your email"));
+     next(Boom.forbidden("You cannot change email"));
 
          }
 
      else {
 
-    User.update({email: req.params.email},updateThis,(err, raw) => {
+    User.update({email: req.params.email},updateThis).then((updated) => {
 
-       if(!raw){
-
-       next(Boom.notFound(err.toString()));      
-        
+       if(!updated){
+   
        }
-
        else {
-           res.send(raw);
-    
+           res.send(err);
        }
-    })
+    });
+
      }
 }
 
 exports.sortUsers = (req, res, next) => {
 
        let fieldInSchema = req.params.param;
-        //  console.log(saad);
 
        User.find({}).sort(fieldInSchema).exec((err, docs) => {
  
@@ -151,12 +134,10 @@ exports.sortUsers = (req, res, next) => {
          }   
 
         else {
-    res.send(docs);
+         res.send(docs);
           }
 
             });
-
-
 };
 
 exports.createPost = (req, res, next) => {    
@@ -177,12 +158,16 @@ exports.createPost = (req, res, next) => {
     }
 
     else {
-        res.send(post); 
+        //res.send(post); 
         authUser.posts.push(post);
 
         authUser.save((err, poster) => {
-
-            console.log(poster);
+             if(err) {
+                 next(Boom.badRequest("Some problem while saving post"));
+             }
+             else {
+            res.send(post);
+             }
         });
         
     }
@@ -193,50 +178,52 @@ exports.createPost = (req, res, next) => {
 
 exports.deletePost = (req, res, next) => {
 
-    let paramID  = req.params.postId
-
-     Post.findOne({_id: req.params.postId}, (err, post) => {
-
-      return post.remove((err) => {
-
+     Post.findOneAndRemove({_id: req.params.postId}, (err, post) => {
             if(!err) {   
 
               User.update({_id: post.postedBy}, {$pull: {posts: post._id}}, (err) => {
-                    if(err) {
+                       if(err) {
                      
                         next(Boom.notFound(err.toString()));
                         }
-                    else {
+                       else {
                             res.send("Post Deleted Successfully");
-                         }
+                          }      
             });
-
-       }
+                 
+                }
+        
+            else  {  
+                next(Boom.forbidden("Its not a valid user ID"));            
+            }
       });
     
-     });
-   
 };
 
 exports.followUser = (req, res, next) => {
 
-   User.findOne({_id: req.params.userId}, (err, usertoFollow) => {
+   let logedUser = req.user;
 
-    let logedUser = req.user;
-    usertoFollow.followers.push(logedUser._id);
-    usertoFollow.save((err, done) => {
+    if(req.params.userId == logedUser._id)  {
+        next(Boom.badImplementation("You cant follow yourself"));
+    }
 
-    if(err) {
+    else {
+
+   User.findOneAndUpdate({_id: req.params.userId},{$addToSet: {followers: logedUser._id}}, (err, usertoFollow) => {
+
+       if(err) {
         next(Boom.notFound("Not a valid ID"));
-    }
+      }
 
-    else{
+      else{
         res.send("You followed " + usertoFollow.firstname);
-    }
-    });
-   });
+      }
+   
+     });
 
-}
+    }
+};
 
 exports.unfollowUser = (req, res, next) => {
 

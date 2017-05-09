@@ -10,6 +10,8 @@ const mongoose = require('mongoose');
 const Users = require( './user/Model');
 //const Boom  = require('boom');
 
+mongoose.Promise = require('bluebird');
+
 mongoose.connect('mongodb://localhost/userdb2', (err) => {
     if(err){
         console.log(err);
