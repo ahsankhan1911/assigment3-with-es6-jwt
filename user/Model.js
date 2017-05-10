@@ -40,7 +40,7 @@ let UserSchema = new Schema({
 
 let PostSchema = new Schema({
 
-    userPost: {type: String},
+    userPost: {type: String , required: true},
     postedBy : {type: Schema.Types.ObjectId, ref: 'Users'},
 });
 

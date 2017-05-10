@@ -16,7 +16,7 @@ router.post('/login', user.logInUser);
 
 router.get('/show', middleware.authenticate, user.showUsers);
 
-router.post('/delete', middleware.authenticate,user.deleteUser);
+router.delete('/delete', middleware.authenticate,user.deleteUser);
 
 router.get('/profile', middleware.authenticate,user.userProfile);
 
