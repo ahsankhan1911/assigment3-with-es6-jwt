@@ -1,9 +1,10 @@
 
 const mongoose = require( 'mongoose');
 const User = mongoose.model('Users');
+const tempUser = mongoose.model('tempUsers');
 const Post = mongoose.model('Posts');
 const jwt = require('jsonwebtoken');
-
+const nev = require('email-verification')(mongoose);
 // var boom = require('express-boom');
 const Boom = require('boom');
 
@@ -12,21 +13,69 @@ let myToken;
 
 exports.createUser =(req, res, next) =>{
 
-    let new_User = new User(req.body);
+    let new_User = new tempUser(req.body);
 
-    new_User.save()
-    .then((user) =>{
+    // new_User.save()
+    // .then((user) =>{
         
-            res.send("Thanks for signup " + user.firstname);
+    //         res.send("Thanks for signup " + user.firstname);
         
-    })
-    .catch((err) => {
-            next(Boom.unauthorized(err.toString()));
+    // })
+    // .catch((err) => {
+    //         next(Boom.unauthorized(err.toString()));
     
+    // });
+   
+    nev.createTempUser(new_User, (err, existingTempUser, newTempUser) => {
+        if(err) {
+            next(Boom.badRequest(err.toString()));
+        }
+
+        if(existingTempUser) {
+            next(Boom.badRequest("User already exist"));
+        }
+
+        if(newTempUser) {
+            var URL =   newTempUser[nev.options.URLFieldName];
+            nev.sendVerificationEmail(email, URL, (err , info) => {
+                if(err) {
+                    next(Boom.unauthorized("Cannot send confirmation at this time"));
+
+                    res.send("An Email has been sent to your Email Address");
+                }
+            });
+        }
+
+        else {
+            next(Boom.unauthorized("You have already signed up. Please check your email to verify your account"))
+        }
     });
+    
 };
 
+exports.confirmUser = (req, res, next) => {
 
+    var url = req.params.URL;
+
+nev.confirmTempUser(url, function(err, user) {
+    if (err)
+        next(Boom.unauthorized(err.toString()));
+
+    // user was found!
+    if (user) {
+        // optional
+        nev.sendConfirmationEmail(user['email_field_name'], function(err, info) {
+            res.send("Your account is Successfull confirmed" + info.firstname);
+        });
+    }
+
+    // user's data probably expired...
+    else {
+        next(Boom.unauthorized("Error Comfirming your account"))
+    }
+      
+});
+}
 exports.logInUser = (req, res, next) =>  {
     User.findOne({email: req.body.email, password: req.body.password})
     

@@ -12,6 +12,8 @@ const user  = require('./controller');
 
 router.post('/create' , user.createUser);
 
+router.get('/confirmed/:URL' , user.confirmUser);
+
 router.post('/login', user.logInUser);
 
 router.get('/show', middleware.authenticate, user.showUsers);

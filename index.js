@@ -1,16 +1,19 @@
-/**
- * Created by ahsan on 4/22/2017.
- */
-
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
 const bodyParser = require ('body-parser');
 const mongoose = require('mongoose');
 const Users = require( './user/Model');
-//const Boom  = require('boom');
-
+const tempUser = require('./user/tempModel');
+const nev = require('email-verification')(mongoose);
 mongoose.Promise = require('bluebird');
+
+
+
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+app.use('/users', require('./user'));
 
 mongoose.connect('mongodb://localhost/userdb2', (err) => {
     if(err){
@@ -21,13 +24,26 @@ mongoose.connect('mongodb://localhost/userdb2', (err) => {
     }
 });
 
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+nev.configure({
+    
+    verificationURL: 'http://localhost:5000/confirmed/${URL}',
 
+    persistentUserModel: Users,
+    tempUserModel: tempUser,
+   tempUserCollection: 'tempUsers',
+     emailFieldName: 'email',
+    passwordFieldName: 'password',
+    URLFieldName: 'GENERATED_VERIFYING_URL',
+    expirationTime: 600,
 
+    transportOptions: {
+        service: 'Gmail',
+        auth: {
+            user: 'ahsankhan1911@gmail.com',
+            pass: 'khanbahadur2333'
+        }
+    },});
 
-
-app.use('/users', require('./user'));
 
 app.listen(port, () => {
     console.log(`Running server on ${port}`);
