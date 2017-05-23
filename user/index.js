@@ -12,7 +12,9 @@ const user  = require('./controller');
 
 router.post('/create' , user.createUser);
 
-router.get('/confirmed/:URL' , user.confirmUser);
+router.get('/confirmation/:URL' , user.confirmUser);
+
+
 
 router.post('/login', user.logInUser);
 

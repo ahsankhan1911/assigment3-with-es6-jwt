@@ -33,6 +33,7 @@
     "mongoose": "^4.9.5",
     "mongoose-validator": "^1.2.5",
     "node-validator": "^0.1.26",
+    "nodemailer": "^4.0.1",
     "passport": "^0.3.2",
     "ve": "^0.1.3"
   }
