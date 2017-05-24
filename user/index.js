@@ -12,9 +12,9 @@ const user  = require('./controller');
 
 router.post('/create' , user.createUser);
 
+router.post('/sendemail' , user.sendEmail);
+
 router.get('/confirmation/:URL' , user.confirmUser);
-
-
 
 router.post('/login', user.logInUser);
 

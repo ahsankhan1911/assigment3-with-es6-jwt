@@ -1,6 +1,3 @@
-s/**
- * Created by ahsan on 4/22/2017.
- */
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
@@ -34,7 +31,8 @@ let UserSchema = new Schema({
         password: {type: String, required: true},
         posts: [{type: Schema.Types.ObjectId, ref: 'Posts'}],
         followers: [{type: Schema.Types.ObjectId, unique: true}],
-        isActive: {type: Boolean, default: false }
+        isActive: {type: Boolean, default: false },
+        confirmationCode: {type: String, default: 0}
     }
 );
 

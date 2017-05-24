@@ -5,62 +5,104 @@ const Post = mongoose.model('Posts');
 const jwt = require('jsonwebtoken');
 const Boom = require('boom');
 const nodemailer = require('nodemailer');
+const uuid = require('node-uuid');
 
 let myToken;
 
         // create reusable transporter object using the default SMTP transport
-let transporter = nodemailer.createTransport({
-              service: 'gmail',
-                auth: {
-                    user: 'ahsankhan1911@gmail.com',
-                    pass: 'khanbahadur2333'
-                    }
-               });
+
 
 // setup email data with unicode symbols
 
 
 exports.createUser =(req, res, next) =>{
 
-    let new_User = new User(req.body);
+    let new_User = new User(req.body, {confirmationCode: code});
+     let code = uuid.v1();
 
-    let mailOptions = {
-            from: 'Node API', // sender address
-            to: req.body.email, // list of receivers
+    new_User.save( (err, user) => {
+   
+      if(!err) { 
+
+           let transporter = nodemailer.createTransport({
+              service: 'gmail',
+                auth: {
+                    user: 'ahsankhan1911@gmail.com',
+                    pass: 'khanbahadur2333'
+                    }
+               });
+               
+           let mailOptions = {
+            from: '"Node API" ,<noreply@nodeapi.com>', // sender address
+            to: user.email, // list of receivers
             subject: 'Account Confirmation', // Subject line
-            html: '<p>Click on this link <a href="#">http://localhost:5000/users/confirmation/'+ adad +'</a> to confirm your account</p>' // html body
+            html: '<p>Click on this link this to confrim your account</p><a href="#" target="_blank">http://localhost:5000/users/confirmation/'+ code + '</a>'
            };
 
 
-    new_User.save()
-    .then((user) =>{
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                 next(Boom.badRequest(error.message));
+            }
+
+            else  {
+            //    User.findOneAndUpdate({email: user.email}, {confirmationCode: code}, (err, updateInfo) => 
+            //    {
+            //       console.log(updateInfo);
+            //    });
+               res.send("Thanks for signup. Please check your email to confirm you account " + user.firstname);
+            }   
+
+           });          
+      }
 
 
-// send mail with defined transport object
-         transporter.sendMail(mailOptions, (error, info) => {
-           if (error) {
-                  res.send(error.message);
-             }
-           
+    else{
+            next(Boom.unauthorized(err.toString()));
+    }
+
+
 });
 
-            res.send("Thanks for signup. Please check your email to confirm you account " + user.firstname);
-        
-    })
-    .catch((err) => {
-            next(Boom.unauthorized(err.toString()));
-    
-    });
-};
+}
+
+
+
+
 
 exports.confirmUser = (req, res, next) => {
 
+    let confirm = req.params.URL;
+ 
+ jwt.verify(confirm , 'secret1', (err, decoded) => {
+     if(!decoded) {
+         next(Boom.badData("Invalid Confirmation URL"))
+     }
+
+     else {
+         User.findOneAndUpdate({email: decoded.email},{isActive: true}, (err, user) => {
+
+             if(!user) {
+                 next(Boom.badRequest("No user found for this URL"))
+             }
+             else {
+                res.send("Your Account has been confirmed successfully")
+             }
+         })
+     }
+ })
 }
+
+
 exports.logInUser = (req, res, next) =>  {
     User.findOne({email: req.body.email, password: req.body.password})
     
       .then( (user) => {
-             
+              if(user.isActive == false) {
+
+                  res.send('Please confirm your account to log In')
+              }
+
             myToken = jwt.sign({
                     id: user._id,
                     email: req.body.email}, 
@@ -69,12 +111,15 @@ exports.logInUser = (req, res, next) =>  {
 
             res.send(myToken);
             
-      exports.myToken = myToken;})
+      exports.myToken = myToken;
+    })
 
       .catch((err) =>    {
 
             next(Boom.unauthorized("Invalid Email or Password"));
-            console.log(err); });
+            console.log(err); 
+        
+    });
  
 };
 
@@ -253,6 +298,28 @@ exports.unfollowUser = (req, res, next) => {
 
 exports.sendEmail = (req, res) =>{ 
 
+let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'ahsankhan1911@gmail.com',
+        pass: 'khanbahadur2333'
+    }
+});
 
+// setup email data with unicode symbols
+let mailOptions = {
+    from: '"Fred Foo 👻" <foo@blurdybloop.com>', // sender address
+    to: req.body.email, // list of receivers
+    subject: 'Hello ✔', // Subject line
+    html: '<b>Hello world ?</b>' // html body
+};
+
+// send mail with defined transport object
+transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        res.send(error.message);
+    }
+     res.send("Email has been sent to " + info.response);
+});
 
 }

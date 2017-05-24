@@ -4,6 +4,7 @@ const port = process.env.PORT || 5000;
 const bodyParser = require ('body-parser');
 const mongoose = require('mongoose');
 const Users = require( './user/Model');
+const uuid = require('node-uuid');
 
 mongoose.Promise = require('bluebird');
 
@@ -24,6 +25,7 @@ mongoose.connect('mongodb://localhost/userdb2', (err) => {
 });
 
 
+
 app.listen(port, () => {
     console.log(`Running server on ${port}`);
 });
@@ -37,3 +39,8 @@ app.use(  (err, req, res, next) => {
 
 
 });
+
+console.log(uuid.v1({
+  node: [0x01, 0x23, 0x45, 0x67, 0x89, 0xab],
+  clockseq: 0x1234,
+}));
