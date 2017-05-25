@@ -1,7 +1,3 @@
-/**
- * Created by ahsan on 4/24/2017.
- */
-//const passport =  require('passport');
 const mongoose = require( 'mongoose');
 const Boom = require('boom');
 const jwt = require('jsonwebtoken');

@@ -40,7 +40,4 @@ app.use(  (err, req, res, next) => {
 
 });
 
-console.log(uuid.v1({
-  node: [0x01, 0x23, 0x45, 0x67, 0x89, 0xab],
-  clockseq: 0x1234,
-}));
+console.log(uuid.v1());
