@@ -8,10 +8,10 @@ const uuid = require('node-uuid');
 
 let myToken;
 let transporter = nodemailer.createTransport({
-             service: 'Yahoo',
+             service: 'gmail',
                 auth: {
-                    user: 'nodeapi12@yahoo.com',
-                    pass: 'hello12345678'
+                    user: 'ahsankhan1911@gmail.com',
+                    pass: 'khanbahadur2333'
                     }
                });
 
@@ -116,6 +116,14 @@ exports.confirmUser = (req, res, next) => {
          
          .then( (user) => {
 
+             if(!user) {
+
+                  next(Boom.badRequest("Invalid URL"));
+ 
+             }
+
+           
+
               res.send("Your Account has been confirmed successfully")  })
 
          .catch((err) => {
@@ -131,7 +139,7 @@ exports.logInUser = (req, res, next) =>  {
       .then( (user) => {
               if(user.isActive == false) {
 
-                  next(Boom.unauthorized('Please confirm your account to log In'));
+                 // next(Boom.unauthorized('Please confirm your account to log In'));
               }
 
             myToken = jwt.sign({
@@ -172,6 +180,8 @@ exports.userProfile =  (req, res, next) => {
 
 
 };
+
+
 
 exports.showUsers =  (req, res, next) => {
 
