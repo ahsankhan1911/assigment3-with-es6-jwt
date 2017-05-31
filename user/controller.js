@@ -11,7 +11,7 @@ let transporter = nodemailer.createTransport({
              service: 'gmail',
                 auth: {
                     user: 'ahsankhan1911@gmail.com',
-                    pass: 'khanbahadur2333'
+                    pass: process.env.Password
                     }
                });
 
@@ -19,43 +19,6 @@ exports.createUser =(req, res, next) =>{
 
     let new_User = new User(req.body);
     let code = uuid.v1();
-
-//     new_User.save( (err, user) => {
-   
-//       if(!err) {        
-//            let mailOptions = {
-//             from: '"Node API" ,<noreply@nodeapi.com>', // sender address
-//             to: user.email, // list of receivers
-//             subject: 'Account Confirmation', // Subject line
-//             html: '<p>Click on this link this to confirm your account</p><a href="#">http://localhost:5000/users/confirmation/'+ code + '</a>'
-//            };
-
-//         transporter.sendMail(mailOptions, (error, info) => {
-//             if (error) {
-//                  next(Boom.badRequest(error.message));
-//             }
-
-//             else  {
-//                User.findOneAndUpdate({email: user.email}, {$set:{confirmationCode: code}}, (err, updateInfo) => 
-//                { 
-//                    if(err) {
-//                        console.log(err)
-//                    }
-//                   console.log(updateInfo);
-//                });
-//                res.send("Thanks for signup. Please check your email to confirm you account " + user.firstname);
-//             }   
-
-//            });          
-//       }
-
-
-//     else{
-//             next(Boom.unauthorized(err.toString()));
-//     }
-
-
-// });
 
  new_User.save()
  
@@ -128,7 +91,7 @@ exports.confirmUser = (req, res, next) => {
 
          .catch((err) => {
           
-          next(Boom.badRequest("No user found for this URL"));
+          next(Boom.badRequest(err.toString()));
          });
 }
 
